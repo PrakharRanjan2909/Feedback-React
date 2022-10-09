@@ -1,16 +1,20 @@
 import { createContext } from "react";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { useEffect } from "react";
+
 const FeedbackContext = createContext();
 
 export const FeedbackProvider = ({ children }) => {
   //children me saab component wrapped hoga
+
+  const [isLoading, setisLoading] = useState(true);
   const [feedback, setFeedback] = useState([
-    {
-      id: 1,
-      text: "This item is from context",
-      rating: 10,
-    },
+    // {
+    //   id: 1,
+    //   text: "This item is from context",
+    //   rating: 10,
+    // },
   ]);
 
   const [feedbackEdit, setFeedbackEdit] = useState({
@@ -18,6 +22,20 @@ export const FeedbackProvider = ({ children }) => {
     item: {},
     edit: false,
   });
+
+  useEffect(() => {
+    fetchFeedback();
+  }, []);
+
+  const fetchFeedback = async () => {
+    const response = await fetch(
+      `http://localhost:4000/feedback?_sort=id&_order=desc`
+    );
+    const data = await response.json();
+    setFeedback(data);
+    setisLoading(false);
+  };
+
   const deleteFeedback = (id) => {
     if (window.confirm("Are you sure you want to delete?")) {
       setFeedback(feedback.filter((item) => item.id !== id));
@@ -49,6 +67,7 @@ export const FeedbackProvider = ({ children }) => {
         editFeedback,
         feedbackEdit,
         updateFeedback,
+        isLoading,
       }}
     >
       {children}
